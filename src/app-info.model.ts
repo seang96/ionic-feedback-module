@@ -1,6 +1,6 @@
 export class AppInfo {
 	public appName: string;
 	public packageName: string;
-	public versionCode: string;
+	public versionCode: string | number;
 	public versionNumber: string;
 }

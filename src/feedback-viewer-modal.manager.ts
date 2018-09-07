@@ -1,19 +1,18 @@
 import { EventEmitter, Injectable } from "@angular/core";
 
-import { AppVersion } from "@ionic-native/app-version";
-import { Device } from "@ionic-native/device";
-import { Screenshot } from "@ionic-native/screenshot";
-import { ModalController, Platform } from "ionic-angular";
+import { AppVersion } from "@ionic-native/app-version/ngx";
+import { Device } from "@ionic-native/device/ngx";
+import { ModalController, Platform } from "@ionic/angular";
+import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { AppInfo } from "./app-info.model";
 import { AttachmentState } from "./attachment-state.model";
 import { FeedbackConfiguration } from "./feedback-configuration.model";
 import { FeedbackContact } from "./feedback-contact.model";
 import { FeedbackViewerModalComponent } from "./feedback-viewer-modal.component";
+import { FeedbackData } from "./feedback-data.model";
 import { FeedbackViewerTranslation } from "./feedback-viewer-translation.model";
-import { FeedbackService } from "./feedback.service";
-
-import { Logger, LoggingService, LogMessage } from "ionic-logging-service";
 
 /**
  * Helper class which makes the usage of the FeedbackViewerModalComponent more comfortable.
@@ -27,31 +26,22 @@ export class FeedbackViewerModalManager {
 	public modalClosed = new EventEmitter<void>();
 
 	private configuration: FeedbackConfiguration;
-	private contact: FeedbackContact;
-
-	private logger: Logger;
+	private contact: FeedbackContact = {};
 
 	private modalIsOpen: boolean;
+
+	private logMessages: string[];
+
+	private _feedbackData = new Subject<FeedbackData>();
+	feedbackDataChange$: Observable<FeedbackData> = this._feedbackData.asObservable();
 
 	constructor(
 		private platform: Platform,
 		private modalController: ModalController,
 		private appVersion: AppVersion,
-		private device: Device,
-		private screenshot: Screenshot,
-		private loggingService: LoggingService,
-		feedbackService: FeedbackService) {
-
-		this.logger = loggingService.getLogger("Ionic.Feedback.Viewer.Modal.Manager");
-		const methodName = "ctor";
-		this.logger.entry(methodName);
-
-		this.configuration = feedbackService.configuration;
-		this.contact = feedbackService.contact;
-
+		private device: Device) {
 		this.modalIsOpen = false;
-
-		this.logger.exit(methodName);
+		this.logMessages = [];
 	}
 
 	/**
@@ -74,46 +64,24 @@ export class FeedbackViewerModalManager {
 		categories: string[] = this.configuration.categories,
 		name: string | undefined = this.contact.name,
 		email: string | undefined = this.contact.email,
-		attachScreenshot: AttachmentState = this.configuration.attachScreenshot,
+		log: string[] = this.logMessages,
 		attachDeviceInfo: AttachmentState = this.configuration.attachDeviceInfo,
 		attachAppInfo: AttachmentState = this.configuration.attachAppInfo,
 		attachLogMessages: AttachmentState = this.configuration.attachLogMessages): Promise<void> {
 
 		// retrieve log messages (as soon as possible)
-		let logMessages: LogMessage[] | undefined;
+		let logMessages: string[] | undefined;
 		if (attachLogMessages === AttachmentState.Ask || attachLogMessages === AttachmentState.Yes) {
 			// thanks to slice(), the array is cloned
-			logMessages = this.loggingService.getLogMessages().slice(0);
+			logMessages = log.slice(0);
 		}
 
-		const methodName = "openModal";
-		this.logger.entry(methodName, language, typeof translation === "object" ? "object" : undefined, categories,
-			name, email, attachScreenshot, attachDeviceInfo, attachAppInfo, attachLogMessages);
-
 		if (this.modalIsOpen) {
-			this.logger.warn(methodName, "modal is already open");
 			throw new Error("FeedbackViewerModalComponent is already open");
 		}
 
 		try {
 			this.modalIsOpen = true;
-
-			// take screenshot
-			let screenshot: string | undefined;
-			if (attachScreenshot === AttachmentState.Ask || attachScreenshot === AttachmentState.Yes) {
-				try {
-					if (await this.platform.ready() === "cordova") {
-						screenshot = (await this.screenshot.URI()).URI;
-						this.logger.debug(methodName, "screenshot taken");
-					} else {
-						this.logger.debug(methodName, "no screenshot taken since not running on device");
-						attachScreenshot = AttachmentState.No;
-					}
-				} catch (e) {
-					this.logger.error(methodName, "could not take screenshot", e);
-					attachScreenshot = AttachmentState.No;
-				}
-			}
 
 			// retrieve device info
 			let deviceInfo: Device | undefined;
@@ -130,7 +98,6 @@ export class FeedbackViewerModalManager {
 						version: this.device.version,
 					};
 				} else {
-					this.logger.debug(methodName, "no device info available since not running on device");
 					attachDeviceInfo = AttachmentState.No;
 				}
 			}
@@ -146,52 +113,81 @@ export class FeedbackViewerModalManager {
 						versionNumber: await this.appVersion.getVersionNumber(),
 					};
 				} else {
-					this.logger.debug(methodName, "no app info available since not running on device");
 					attachAppInfo = AttachmentState.No;
 				}
 			}
 
-			const modal = this.modalController.create(FeedbackViewerModalComponent, {
-				// tslint:disable:object-literal-sort-keys
-				categories,
-				name,
-				email,
-				attachLogMessages,
-				logMessages,
-				attachDeviceInfo,
-				deviceInfo,
-				attachAppInfo,
-				appInfo,
-				attachScreenshot,
-				screenshot,
-				language,
-				translation,
-				// tslint:enable:object-literal-sort-keys
+			const modal = await this.modalController.create({
+				component: FeedbackViewerModalComponent,
+				componentProps: {
+					// tslint:disable:object-literal-sort-keys
+					categories,
+					name,
+					email,
+					attachLogMessages,
+					logMessages,
+					attachDeviceInfo,
+					deviceInfo,
+					attachAppInfo,
+					appInfo,
+					language,
+					translation,
+					// tslint:enable:object-literal-sort-keys
+				}
 			});
-			modal.onDidDismiss(() => {
+			modal.onDidDismiss().then(() => {
 				this.onModalClosed();
 			});
 			await modal.present();
 		} catch (e) {
-			this.logger.error(methodName, e);
 			// something went wrong, so the modal is not open
 			this.modalIsOpen = false;
 			throw e;
 		}
-
-		this.logger.exit(methodName);
 	}
 
 	/**
 	 * Callback called when the modal is closed.
 	 */
 	private onModalClosed(): void {
-		const methodName = "onModalClosed";
-		this.logger.entry(methodName);
-
 		this.modalIsOpen = false;
 		this.modalClosed.emit();
+	}
 
-		this.logger.exit(methodName);
+
+	public async sendFeedback(
+		timestamp: string, category: string, message: string, name: string,
+		email: string, deviceInfo: Device | undefined, appInfo: AppInfo | undefined,
+		logMessages: string[] | undefined) {
+		const feedbackData: FeedbackData = {
+			appInfo,
+			category,
+			deviceInfo,
+			email,
+			logMessages,
+			message,
+			name,
+			timestamp,
+		};
+		this._feedbackData.next(feedbackData);
+	}
+
+	public configure(configuration: any): void {
+		// map enum values
+		if (typeof configuration.attachLogMessages === "string") {
+			configuration.attachLogMessages = AttachmentState[configuration.attachLogMessages as any] as any as AttachmentState;
+		}
+		if (typeof configuration.attachDeviceInfo === "string") {
+			configuration.attachDeviceInfo = AttachmentState[configuration.attachDeviceInfo as any] as any as AttachmentState;
+		}
+		if (typeof configuration.attachAppInfo === "string") {
+			configuration.attachAppInfo = AttachmentState[configuration.attachAppInfo as any] as any as AttachmentState;
+		}
+
+		this.configuration = configuration;
+	}
+
+	public updateContact(name: string, email: string) {
+		this.contact = {name, email};
 	}
 }

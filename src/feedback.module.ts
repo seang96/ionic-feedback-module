@@ -1,10 +1,13 @@
-import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
-import { IonicModule } from "ionic-angular";
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonicModule } from "@ionic/angular";
 
 import { FeedbackViewerModalComponent } from "./feedback-viewer-modal.component";
 import { FeedbackViewerModalManager } from "./feedback-viewer-modal.manager";
-import { FeedbackService } from "./feedback.service";
+
+import { Device } from '@ionic-native/device/ngx';
+import { AppVersion } from "@ionic-native/app-version/ngx";
 
 @NgModule({
 	declarations: [
@@ -14,12 +17,14 @@ import { FeedbackService } from "./feedback.service";
 		FeedbackViewerModalComponent,
 	],
 	imports: [
-		HttpClientModule,
 		IonicModule,
+		CommonModule,
+		FormsModule,
 	],
 	providers: [
 		FeedbackViewerModalManager,
-		FeedbackService,
+		Device,
+		AppVersion,
 	],
 })
 export class FeedbackModule { }

@@ -18,7 +18,8 @@
 		"declaration": true,
 		"sourceMap": true,
 		"outDir": "dist",
-		"strict": true
+		"strict": true,
+		"strictPropertyInitialization": false
 	},
 	"files": [
 		"./src/index.ts"

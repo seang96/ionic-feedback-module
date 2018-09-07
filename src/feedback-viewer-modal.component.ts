@@ -1,16 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 
-import { Device } from "@ionic-native/device";
-import { AlertController, LoadingController, NavParams, ViewController } from "ionic-angular";
+import { AlertController, LoadingController, ModalController, NavParams } from "@ionic/angular";
 
-import moment from "moment";
-
-import { Logger, LoggingService, LogMessage } from "ionic-logging-service";
-
+import { Device } from "@ionic-native/device/ngx";
 import { AppInfo } from "./app-info.model";
 import { AttachmentState } from "./attachment-state.model";
 import { FeedbackViewerTranslation } from "./feedback-viewer-translation.model";
-import { FeedbackService } from "./feedback.service";
+import { FeedbackViewerModalManager } from './feedback-viewer-modal.manager';
 
 /**
  * Ionic modal showing FeedbackViewerComponent.
@@ -22,17 +18,17 @@ import { FeedbackService } from "./feedback.service";
 	<ion-toolbar color="primary">
 		<ion-title>{{ getTranslation().title }}</ion-title>
 		<ion-buttons start>
-			<button ion-button hideWhen="android,windows" (click)="onClose()">
+			<ion-button hideWhen="android,windows" (click)="onClose()">
 				{{ getTranslation().cancel }}
-			</button>
-			<button ion-button icon-only showWhen="android,windows" (click)="onClose()">
+			</ion-button>
+			<ion-button icon-only showWhen="android,windows" (click)="onClose()">
 				<ion-icon name="md-close"></ion-icon>
-			</button>
+			</ion-button>
 		</ion-buttons>
 		<ion-buttons end>
-			<button ion-button (click)="onSend()" [disabled]="sendDisabled">
+			<ion-button (click)="onSend()" [disabled]="sendDisabled">
 				{{ getTranslation().send }}
-			</button>
+			</ion-button>
 		</ion-buttons>
 	</ion-toolbar>
 </ion-header>
@@ -41,7 +37,7 @@ import { FeedbackService } from "./feedback.service";
 	<ion-list>
 		<ion-item *ngIf="showCategories">
 			<ion-select [(ngModel)]="category" interface="popover">
-				<ion-option *ngFor="let c of categories" [value]="c">{{c}}</ion-option>
+				<ion-select-option *ngFor="let c of categories" [value]="c">{{c}}</ion-select-option>
 			</ion-select>
 		</ion-item>
 
@@ -57,20 +53,6 @@ import { FeedbackService } from "./feedback.service";
 		</ion-item>
 	</ion-list>
 
-	<ion-card *ngIf="showScreenshot">
-		<ion-card-header>
-			<ion-item>
-				<ion-label>{{ getTranslation().includeScreenshot }}</ion-label>
-				<ion-checkbox [(ngModel)]="includeScreenshot"></ion-checkbox>
-			</ion-item>
-		</ion-card-header>
-		<ion-list *ngIf="includeScreenshot">
-			<ion-item>
-				<img class="screenshot" [src]="screenshot" />
-			</ion-item>
-		</ion-list>
-	</ion-card>
-
 	<ion-card *ngIf="showDeviceInfo">
 		<ion-card-header>
 			<ion-item>
@@ -80,35 +62,35 @@ import { FeedbackService } from "./feedback.service";
 		</ion-card-header>
 		<ion-list *ngIf="includeDeviceInfo">
 			<ion-item>
-				<div item-left>{{ getTranslation().manufacturer }}</div>
+				<div item-left>{{ getTranslation().manufacturer }}: </div>
 				<div item-right text-right>{{deviceInfo.manufacturer}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().model }}</div>
+				<div item-left>{{ getTranslation().model }}: </div>
 				<div item-right text-right>{{deviceInfo.model}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().uuid }}</div>
+				<div item-left>{{ getTranslation().uuid }}: </div>
 				<div item-right text-right>{{deviceInfo.uuid}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().serial }}</div>
+				<div item-left>{{ getTranslation().serial }}: </div>
 				<div item-right text-right>{{deviceInfo.serial}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().platform }}</div>
+				<div item-left>{{ getTranslation().platform }}: </div>
 				<div item-right text-right>{{deviceInfo.platform}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().version }}</div>
+				<div item-left>{{ getTranslation().version }}: </div>
 				<div item-right text-right>{{deviceInfo.version}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().cordova }}</div>
+				<div item-left>{{ getTranslation().cordova }}: </div>
 				<div item-right text-right>{{deviceInfo.cordova}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().isVirtual }}</div>
+				<div item-left>{{ getTranslation().isVirtual }}: </div>
 				<div item-right text-right>{{deviceInfo.isVirtual}}</div>
 			</ion-item>
 		</ion-list>
@@ -117,25 +99,25 @@ import { FeedbackService } from "./feedback.service";
 	<ion-card *ngIf="showAppInfo">
 		<ion-card-header>
 			<ion-item>
-				<ion-label>{{ getTranslation().includeAppInfo }}</ion-label>
+				<ion-label>{{ getTranslation().includeAppInfo }}: </ion-label>
 				<ion-checkbox [(ngModel)]="includeAppInfo"></ion-checkbox>
 			</ion-item>
 		</ion-card-header>
 		<ion-list *ngIf="includeAppInfo">
 			<ion-item>
-				<div item-left>{{ getTranslation().appName }}</div>
+				<div item-left>{{ getTranslation().appName }}: </div>
 				<div item-right text-right>{{appInfo.appName}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().packageName }}</div>
+				<div item-left>{{ getTranslation().packageName }}: </div>
 				<div item-right text-right>{{appInfo.packageName}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().versionCode }}</div>
+				<div item-left>{{ getTranslation().versionCode }}: </div>
 				<div item-right text-right>{{appInfo.versionCode}}</div>
 			</ion-item>
 			<ion-item>
-				<div item-left>{{ getTranslation().versionNumber }}</div>
+				<div item-left>{{ getTranslation().versionNumber }}: </div>
 				<div item-right text-right>{{appInfo.versionNumber}}</div>
 			</ion-item>
 		</ion-list>
@@ -148,16 +130,6 @@ import { FeedbackService } from "./feedback.service";
 				<ion-checkbox [(ngModel)]="includeLogMessages"></ion-checkbox>
 			</ion-item>
 		</ion-card-header>
-		<ion-list *ngIf="includeLogMessages">
-			<ion-item *ngFor="let logMessage of logMessages">
-				<p>{{logMessage.timeStamp | date: 'dd.MM.yyyy HH:mm:ss'}} {{logMessage.level}}</p>
-				<p>{{logMessage.logger}}</p>
-				<p>
-					{{logMessage.methodName}}
-					<span *ngFor="let messagePart of logMessage.message">{{messagePart}} </span>
-				</p>
-			</ion-item>
-		</ion-list>
 	</ion-card>
 
 </ion-content>
@@ -172,18 +144,14 @@ export class FeedbackViewerModalComponent implements OnInit {
 	public message: string;
 	public name: string;
 	public email: string;
-	public showScreenshot: boolean;
-	public includeScreenshot: boolean;
-	public screenshot: string;
 	public showDeviceInfo: boolean;
 	public includeDeviceInfo: boolean;
-	public deviceInfo: Device;
 	public showAppInfo: boolean;
 	public includeAppInfo: boolean;
 	public appInfo: AppInfo;
 	public showLogMessages: boolean;
 	public includeLogMessages: boolean;
-	public logMessages: LogMessage[];
+	public logMessages: string[];
 
 	public get sendDisabled(): boolean {
 		return typeof this.message === "undefined" || this.message.length === 0;
@@ -201,21 +169,15 @@ export class FeedbackViewerModalComponent implements OnInit {
 	 */
 	private translation: FeedbackViewerTranslation;
 
-	private logger: Logger;
-
 	private translations: { [language: string]: FeedbackViewerTranslation; };
 
 	constructor(
-		private viewController: ViewController,
+		private modalController: ModalController,
 		navParams: NavParams,
 		private alertController: AlertController,
 		private loadingController: LoadingController,
-		loggingService: LoggingService,
-		private feedbackService: FeedbackService) {
-
-		this.logger = loggingService.getLogger("Ionic.Feedback.Viewer.Modal.Component");
-		const methodName = "ctor";
-		this.logger.entry(methodName);
+		private deviceInfo: Device,
+		private feedbackViewerModalManager: FeedbackViewerModalManager) {
 
 		this.categories = navParams.get("categories");
 		if (Array.isArray(this.categories) && this.categories.length > 0) {
@@ -225,17 +187,10 @@ export class FeedbackViewerModalComponent implements OnInit {
 			this.showCategories = false;
 		}
 
-		this.screenshot = navParams.get("screenshot");
-		const attachScreenshot: AttachmentState = navParams.get("attachScreenshot");
-		this.includeScreenshot = attachScreenshot === AttachmentState.Yes || attachScreenshot === AttachmentState.Ask;
-		this.showScreenshot = attachScreenshot === AttachmentState.Ask;
-
-		this.deviceInfo = navParams.get("deviceInfo");
 		const attachDeviceInfo: AttachmentState = navParams.get("attachDeviceInfo");
 		this.includeDeviceInfo = attachDeviceInfo === AttachmentState.Yes || attachDeviceInfo === AttachmentState.Ask;
 		this.showDeviceInfo = attachDeviceInfo === AttachmentState.Ask;
 
-		this.appInfo = navParams.get("appInfo");
 		const attachAppInfo: AttachmentState = navParams.get("attachAppInfo");
 		this.includeAppInfo = attachAppInfo === AttachmentState.Yes || attachAppInfo === AttachmentState.Ask;
 		this.showAppInfo = attachAppInfo === AttachmentState.Ask;
@@ -245,14 +200,12 @@ export class FeedbackViewerModalComponent implements OnInit {
 		this.includeLogMessages = attachLogMessages === AttachmentState.Yes || attachLogMessages === AttachmentState.Ask;
 		this.showLogMessages = attachLogMessages === AttachmentState.Ask;
 
-		this.timestamp = moment().toISOString();
-		this.name = navParams.get("name");
+		this.timestamp = new Date().toISOString();
+		this.name = navParams.get("name")
 		this.email = navParams.get("email");
 
 		this.language = navParams.get("language");
 		this.translation = navParams.get("translation");
-
-		this.logger.exit(methodName);
 	}
 
 	/**
@@ -329,57 +282,44 @@ export class FeedbackViewerModalComponent implements OnInit {
 	/**
 	 * Eventhandler called by Ionic when the modal is opened.
 	 */
-	public ionViewDidEnter(): void {
-		const methodName = "ionViewDidEnter";
-		this.logger.entry(methodName);
-
-		this.logger.exit(methodName);
+	public ionViewDidEnter() {
 	}
 
 	/**
 	 * Eventhandler called when the cancel button is clicked.
 	 */
 	public onClose(): void {
-		const methodName = "onClose";
-		this.logger.entry(methodName);
-
-		this.viewController.dismiss();
-
-		this.logger.exit(methodName);
+		this.modalController.dismiss();
 	}
 
 	public async onSend(): Promise<void> {
-		const methodName = "onSend";
-		this.logger.entry(methodName);
-
-		const loading = this.loadingController.create();
+		let loading : any;
 		try {
-			loading.present();
+			loading = await this.loadingController.create();
+			await loading.present();
 
-			await this.feedbackService.sendFeedback(
+			await this.feedbackViewerModalManager.sendFeedback(
 				this.timestamp,
 				this.category,
 				this.message,
 				this.name,
 				this.email,
-				this.includeScreenshot ? this.screenshot : undefined,
 				this.includeDeviceInfo ? this.deviceInfo : undefined,
 				this.includeAppInfo ? this.appInfo : undefined,
 				this.includeLogMessages ? this.logMessages : undefined,
 			);
 			await loading.dismiss();
-			this.viewController.dismiss();
+			this.modalController.dismiss();
 		} catch (e) {
-			await loading.dismiss();
-			const alert = this.alertController.create({
+			if (loading)
+				await loading.dismiss();
+			let alert = await this.alertController.create({
 				buttons: [this.getTranslation().ok],
-				subTitle: this.getTranslation().errorSending,
-				title: this.getTranslation().title,
+				subHeader: this.getTranslation().errorSending,
+				header: this.getTranslation().title,
 			});
 			await alert.present();
 		}
-
-		this.logger.exit(methodName);
 	}
 
 	/**
