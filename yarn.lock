@@ -123,15 +123,15 @@
   dependencies:
     "@types/cordova" latest
 
-"@ionic/angular@^4.0.0-beta.7":
-  version "4.0.0-beta.7"
-  resolved "https://registry.yarnpkg.com/@ionic/angular/-/angular-4.0.0-beta.7.tgz#ec916edeceebd2dd07a70d9aceac4436205929bb"
+"@ionic/angular@^4.0.0-beta.8":
+  version "4.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/@ionic/angular/-/angular-4.0.0-beta.8.tgz#43b1596666199bc5c80d5bef600b3f27bb7703c1"
   dependencies:
-    "@ionic/core" "4.0.0-beta.7"
+    "@ionic/core" "4.0.0-beta.8"
 
-"@ionic/core@4.0.0-beta.7":
-  version "4.0.0-beta.7"
-  resolved "https://registry.yarnpkg.com/@ionic/core/-/core-4.0.0-beta.7.tgz#abdc47d4a738796c1576bc33e065beb07d2644dd"
+"@ionic/core@4.0.0-beta.8":
+  version "4.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/@ionic/core/-/core-4.0.0-beta.8.tgz#abe892f96b5af60732878ce2767e656e91593494"
   dependencies:
     ionicons "4.4.3"
 
