@@ -4,15 +4,10 @@ export default {
 	external: [
 		'@angular/core',
 		'@angular/common',
-		'@angular/common/http',
+		'@angular/cli',
 		'@ionic-native/app-version',
 		'@ionic-native/device',
-		'@ionic-native/screenshot',
-		'@ionic-native/shake',
-		'ionic-angular',
-		'ionic-configuration-service',
-		'ionic-logging-service',
-		'moment'
+		'ionic-angular'
 	],
 	onwarn: (warning) => {
 		const skip_codes = [
