@@ -23,7 +23,7 @@
 		"pack": "npm run build && npm pack",
 		"semantic-release": "semantic-release pre && npm publish && semantic-release post",
 		"test": "npm run build && npm run lint",
-		"prepack": "npm i --production && npm run build"
+		"prepack": "npm i && npm run build"
 	},
 	"files": [
 		"dist",
