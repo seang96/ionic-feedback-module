@@ -8,6 +8,7 @@ dist/**/*.scss
 node_modules/
 src/**/*.ngfactory.ts
 package/
+.rpt2_cache/
 
 *.tgz
 npm-debug.log

@@ -17,7 +17,7 @@
 		"build": "npm run clean && npm run compile && npm run copy-scss",
 		"clean": "npx shx rm -rf dist/*.d.ts dist/*.js dist/*.map dist/*.json dist/*.scss src/*.ngfactory.ts",
 		"commit": "git-cz",
-		"compile": "tsc -p tsconfig.json && rollup -c rollup.config.js dist/feedback.module.js >= dist/feedback.bundle.js && ngc -p tsconfig.aot.json",
+		"compile": "tsc -p tsconfig.json && rollup -c rollup.config.js && ngc -p tsconfig.aot.json",
 		"copy-scss": "npx shx cp src/*.scss dist",
 		"lint": "tslint --project tsconfig.aot.json --format verbose",
 		"pack": "npm run build && npm pack",
@@ -73,7 +73,8 @@
 		"cz-conventional-changelog": ">=2.1.0",
 		"reflect-metadata": ">=0.1.10",
 		"requirejs": ">=2.3.5",
-		"rollup": ">=0.52.1",
+		"rollup": ">=1.1.2",
+		"rollup-plugin-typescript2": "^0.19.2",
 		"tslint": ">=5.11.0",
 		"typescript": ">=2.9.2",
 		"zone.js": ">=0.8.26"

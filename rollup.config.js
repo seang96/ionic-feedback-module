@@ -1,7 +1,12 @@
+import typescript from 'rollup-plugin-typescript2';
+ 
 export default {
-	format: 'umd',
-	moduleName: 'feedback-module',
-	external: [
+    input: './src/index.ts',
+    output: {
+    	format: "umd",
+    	name: "./dist/index.js"
+    },
+    external: [
 		'@angular/core',
 		'@angular/common',
 		'@angular/cli',
@@ -9,13 +14,7 @@ export default {
 		'@ionic-native/device',
 		'ionic-angular'
 	],
-	onwarn: (warning) => {
-		const skip_codes = [
-			'THIS_IS_UNDEFINED',
-			'MISSING_GLOBAL_NAME',
-			'DEPRECATED_OPTIONS'
-		];
-		if (skip_codes.indexOf(warning.code) != -1) return;
-		console.error(warning);
-	}
+    plugins: [
+        typescript(/*{ plugin options }*/)
+    ]
 }
