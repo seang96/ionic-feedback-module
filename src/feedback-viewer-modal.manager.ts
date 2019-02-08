@@ -5,6 +5,7 @@ import { Device } from "@ionic-native/device/ngx";
 import { ModalController, Platform } from "@ionic/angular";
 import { Subject } from 'rxjs';
 import { Observable } from 'rxjs';
+import { Pro } from '@ionic/pro';
 
 import { AppInfo } from "./app-info.model";
 import { AttachmentState } from "./attachment-state.model";
@@ -111,6 +112,10 @@ export class FeedbackViewerModalManager {
 						packageName: await this.appVersion.getPackageName(),
 						versionCode: await this.appVersion.getVersionCode(),
 						versionNumber: await this.appVersion.getVersionNumber(),
+						ionicPro: {
+							configuration: await Pro.deploy.getConfiguration(),
+							currentVersion: await Pro.deploy.getCurrentVersion()
+						}
 					};
 				} else {
 					attachAppInfo = AttachmentState.No;
