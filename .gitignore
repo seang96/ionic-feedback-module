@@ -12,3 +12,5 @@ package/
 
 *.tgz
 npm-debug.log
+*.sublime-project
+*.sublime-workspace
