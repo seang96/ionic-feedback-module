@@ -4,4 +4,5 @@ export class AppInfo {
 	public versionCode: string | number;
 	public versionNumber: string;
 	public ionicPro: any;
+	public hotCodeVersion: string;
 }
