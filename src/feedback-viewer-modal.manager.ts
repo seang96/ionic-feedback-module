@@ -66,6 +66,7 @@ export class FeedbackViewerModalManager {
 		name: string | undefined = this.contact.name,
 		email: string | undefined = this.contact.email,
 		log: string[] = this.logMessages,
+		appVersion: string,
 		attachDeviceInfo: AttachmentState = this.configuration.attachDeviceInfo,
 		attachAppInfo: AttachmentState = this.configuration.attachAppInfo,
 		attachLogMessages: AttachmentState = this.configuration.attachLogMessages): Promise<void> {
@@ -112,6 +113,7 @@ export class FeedbackViewerModalManager {
 						packageName: await this.appVersion.getPackageName(),
 						versionCode: await this.appVersion.getVersionCode(),
 						versionNumber: await this.appVersion.getVersionNumber(),
+						hotCodeVersion: appVersion,
 						ionicPro: {
 							configuration: await Pro.deploy.getConfiguration(),
 							currentVersion: await Pro.deploy.getCurrentVersion()
