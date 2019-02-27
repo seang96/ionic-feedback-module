@@ -18,10 +18,10 @@ import { FeedbackViewerModalManager } from './feedback-viewer-modal.manager';
 	<ion-toolbar color="primary">
 		<ion-title>{{ getTranslation().title }}</ion-title>
 		<ion-buttons slot="start">
-			<ion-button *ngIf="!(this.platform.is('android') || this.platform.is('windows'))" (click)="onClose()">
+			<ion-button *ngIf="!(this.platform.is('android') || this.platform.is('windows') || !this.platform.is('cordova'))" (click)="onClose()">
 				{{ getTranslation().cancel }}
 			</ion-button>
-			<ion-button icon-only *ngIf="this.platform.is('android') || this.platform.is('windows')" (click)="onClose()">
+			<ion-button icon-only *ngIf="this.platform.is('android') || this.platform.is('windows') || !this.platform.is('cordova')" (click)="onClose()">
 				<ion-icon name="close"></ion-icon>
 			</ion-button>
 		</ion-buttons>
