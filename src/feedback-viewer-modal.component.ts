@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 
-import { AlertController, LoadingController, ModalController, NavParams } from "@ionic/angular";
+import { AlertController, LoadingController, ModalController, NavParams, Platform } from "@ionic/angular";
 
 import { Device } from "@ionic-native/device/ngx";
 import { AppInfo } from "./app-info.model";
@@ -17,15 +17,15 @@ import { FeedbackViewerModalManager } from './feedback-viewer-modal.manager';
 <ion-header>
 	<ion-toolbar color="primary">
 		<ion-title>{{ getTranslation().title }}</ion-title>
-		<ion-buttons start>
-			<ion-button hideWhen="android,windows" (click)="onClose()">
+		<ion-buttons slot="start">
+			<ion-button *ngIf="!(this.platform.is('android') && this.platform.is('windows'))" (click)="onClose()">
 				{{ getTranslation().cancel }}
 			</ion-button>
-			<ion-button icon-only showWhen="android,windows" (click)="onClose()">
-				<ion-icon name="md-close"></ion-icon>
+			<ion-button icon-only *ngIf="this.platform.is('android') && this.platform.is('windows')" (click)="onClose()">
+				<ion-icon name="close"></ion-icon>
 			</ion-button>
 		</ion-buttons>
-		<ion-buttons end>
+		<ion-buttons slot="primary">
 			<ion-button (click)="onSend()" [disabled]="sendDisabled">
 				{{ getTranslation().send }}
 			</ion-button>
@@ -177,6 +177,7 @@ export class FeedbackViewerModalComponent implements OnInit {
 		private alertController: AlertController,
 		private loadingController: LoadingController,
 		private deviceInfo: Device,
+		private platform: Platform,
 		private feedbackViewerModalManager: FeedbackViewerModalManager) {
 
 		this.categories = navParams.get("categories");
