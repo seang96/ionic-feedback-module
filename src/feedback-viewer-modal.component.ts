@@ -177,7 +177,7 @@ export class FeedbackViewerModalComponent implements OnInit {
 		private alertController: AlertController,
 		private loadingController: LoadingController,
 		private deviceInfo: Device,
-		private platform: Platform,
+		public platform: Platform,
 		private feedbackViewerModalManager: FeedbackViewerModalManager) {
 
 		this.categories = navParams.get("categories");
